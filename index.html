@@ -261,7 +261,7 @@
         <iframe
           title="Map to Kids Fun Marki"
           loading="lazy"
-          src="https://www.google.com/maps?q=Pi%C5%82sudskiego%20119%2C%2005-270%20Marki&output=embed"
+          data-src="https://www.google.com/maps?q=Pi%C5%82sudskiego%20119%2C%2005-270%20Marki&output=embed"
         ></iframe>
       </div>
       <p class="map-note">
@@ -358,8 +358,39 @@
       URL.revokeObjectURL(url);
     });
 
+    function loadMapWhenVisible() {
+      const mapFrame = document.querySelector(".map-wrapper iframe");
+      if (!mapFrame || mapFrame.src) {
+        return;
+      }
+
+      const loadMap = () => {
+        if (!mapFrame.src) {
+          mapFrame.src = mapFrame.dataset.src;
+        }
+      };
+
+      if (!("IntersectionObserver" in window)) {
+        loadMap();
+        return;
+      }
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            loadMap();
+            observer.disconnect();
+          }
+        },
+        { rootMargin: "200px" }
+      );
+
+      observer.observe(mapFrame);
+    }
+
     updateCountdown();
     setInterval(updateCountdown, 1000 * 60 * 60);
+    loadMapWhenVisible();
   </script>
 </body>
 </html>
